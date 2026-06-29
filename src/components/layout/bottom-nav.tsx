@@ -1,0 +1,52 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { LayoutDashboard, MessageSquare, Users, GitBranch } from "lucide-react";
+import { useTotalUnread } from "@/hooks/use-total-unread";
+
+const bottomNavItems = [
+  { href: "/dashboard", label: "Home", icon: LayoutDashboard },
+  { href: "/inbox", label: "Inbox", icon: MessageSquare },
+  { href: "/contacts", label: "Contacts", icon: Users },
+  { href: "/pipelines", label: "Deals", icon: GitBranch },
+];
+
+export function BottomNav() {
+  const pathname = usePathname();
+  const totalUnread = useTotalUnread();
+
+  return (
+    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-slate-800 bg-slate-900 pb-safe pt-1 lg:hidden">
+      {bottomNavItems.map((item) => {
+        const isActive =
+          pathname === item.href ||
+          (item.href !== "/dashboard" && pathname.startsWith(item.href));
+
+        const showUnreadBadge = item.href === "/inbox" && totalUnread > 0;
+
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            className={cn(
+              "relative flex flex-1 flex-col items-center justify-center gap-1 py-1 transition-colors",
+              isActive ? "text-primary" : "text-slate-400 hover:text-slate-200"
+            )}
+          >
+            <div className="relative">
+              <item.icon className={cn("h-5 w-5", isActive && "fill-primary/20")} />
+              {showUnreadBadge && (
+                <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
+                  {totalUnread > 99 ? "99+" : totalUnread}
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] font-medium">{item.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
