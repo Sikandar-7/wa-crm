@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Layers } from "lucide-react";
 
 export default async function AdminDashboardPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Get some basic stats
   const { count: usersCount } = await supabase

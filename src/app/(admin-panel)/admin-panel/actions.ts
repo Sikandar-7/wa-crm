@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 export async function assignPlanAction(userId: string, planId: string) {
-  const supabase = createClient();
+  const supabase = await createClient();
   
   // Verify admin
   const { data: { user } } = await supabase.auth.getUser();

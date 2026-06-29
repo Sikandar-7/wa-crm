@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { UsersClientPage } from "./users-client";
 
 export default async function AdminUsersPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Fetch all profiles
   const { data: users } = await supabase

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 
 export default async function AdminPlansPage() {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: plans } = await supabase
     .from("plans")
