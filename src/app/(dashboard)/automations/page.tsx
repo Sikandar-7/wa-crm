@@ -71,8 +71,8 @@ export default function AutomationsPage() {
         .order("created_at", { ascending: false })
       if (fetchErr) throw fetchErr
       setAutomations((data ?? []) as Automation[])
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load automations")
+    } catch (err: any) {
+      setError(err?.message || "Failed to load automations")
     }
   }
 

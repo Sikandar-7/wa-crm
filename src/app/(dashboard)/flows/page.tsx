@@ -97,7 +97,9 @@ export default function FlowsPage() {
           fetch("/api/flows/templates"),
         ]);
         if (!flowsRes.ok) {
-          throw new Error(`Failed to load flows: ${flowsRes.status}`);
+          const errText = await flowsRes.text().catch(() => '');
+          console.error('[Flows API Error]:', errText);
+          throw new Error(`Failed to load flows: ${flowsRes.status} ${errText}`);
         }
         const flowsJson = (await flowsRes.json()) as { flows: FlowRow[] };
         if (!cancelled) setFlows(flowsJson.flows ?? []);

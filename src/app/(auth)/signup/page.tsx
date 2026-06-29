@@ -29,6 +29,14 @@ export default function SignupPage() {
     e.preventDefault();
     setError(null);
 
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedFullName = fullName.trim();
+
+    if (!normalizedEmail) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
@@ -42,11 +50,11 @@ export default function SignupPage() {
     setLoading(true);
 
     const { error } = await supabase.auth.signUp({
-      email,
+      email: normalizedEmail,
       password,
       options: {
         data: {
-          full_name: fullName,
+          full_name: normalizedFullName,
         },
       },
     });
