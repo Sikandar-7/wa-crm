@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, MessageSquare, Users, GitBranch } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Users, GitBranch, User } from "lucide-react";
 import { useTotalUnread } from "@/hooks/use-total-unread";
 
 const bottomNavItems = [
@@ -11,6 +11,7 @@ const bottomNavItems = [
   { href: "/inbox", label: "Inbox", icon: MessageSquare },
   { href: "/contacts", label: "Contacts", icon: Users },
   { href: "/pipelines", label: "Deals", icon: GitBranch },
+  { href: "/settings", label: "Profile", icon: User },
 ];
 
 export function BottomNav() {

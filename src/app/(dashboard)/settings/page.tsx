@@ -10,6 +10,8 @@ import { ProfileForm } from '@/components/settings/profile-form';
 import { PasswordForm } from '@/components/settings/password-form';
 import { SessionsCard } from '@/components/settings/sessions-card';
 import { AppearancePanel } from '@/components/settings/appearance-panel';
+import { PlanCard } from '@/components/settings/plan-card';
+import { CreditCard } from 'lucide-react';
 
 const TAB_VALUES = [
   'profile',
@@ -17,6 +19,7 @@ const TAB_VALUES = [
   'templates',
   'tags',
   'appearance',
+  'plan',
 ] as const;
 type TabValue = (typeof TAB_VALUES)[number];
 
@@ -88,6 +91,13 @@ export default function SettingsPage() {
             <Palette className="size-4" />
             Appearance
           </TabsTrigger>
+          <TabsTrigger
+            value="plan"
+            className="data-active:bg-slate-800 data-active:text-primary text-slate-400"
+          >
+            <CreditCard className="size-4" />
+            Plan
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
@@ -110,6 +120,10 @@ export default function SettingsPage() {
 
         <TabsContent value="appearance">
           <AppearancePanel />
+        </TabsContent>
+
+        <TabsContent value="plan">
+          <PlanCard />
         </TabsContent>
       </Tabs>
     </div>
