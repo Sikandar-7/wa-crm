@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, MessageSquare, Users, GitBranch, User } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Users, GitBranch, User, CreditCard } from "lucide-react";
 import { useTotalUnread } from "@/hooks/use-total-unread";
 
 const bottomNavItems = [
@@ -11,6 +11,7 @@ const bottomNavItems = [
   { href: "/inbox", label: "Inbox", icon: MessageSquare },
   { href: "/contacts", label: "Contacts", icon: Users },
   { href: "/pipelines", label: "Deals", icon: GitBranch },
+  { href: "/settings?tab=plan", label: "Plan", icon: CreditCard },
   { href: "/settings", label: "Profile", icon: User },
 ];
 
@@ -21,9 +22,18 @@ export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-slate-800 bg-slate-900 pb-safe pt-1 lg:hidden">
       {bottomNavItems.map((item) => {
-        const isActive =
-          pathname === item.href ||
-          (item.href !== "/dashboard" && pathname.startsWith(item.href));
+        const isPlan = item.href.includes('tab=plan');
+        const isSettings = item.href === '/settings';
+        const tab = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get("tab") : null;
+        
+        let isActive = false;
+        if (isPlan) {
+          isActive = tab === "plan";
+        } else if (isSettings) {
+          isActive = pathname === "/settings" && tab !== "plan";
+        } else {
+          isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
+        }
 
         const showUnreadBadge = item.href === "/inbox" && totalUnread > 0;
 

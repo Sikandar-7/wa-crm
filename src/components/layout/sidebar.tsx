@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
@@ -18,6 +18,7 @@ import {
   LogOut,
   User,
   X,
+  CreditCard,
 } from "lucide-react";
 import {
   Avatar,
@@ -54,6 +55,7 @@ const navItems: NavItem[] = [
 ];
 
 const bottomNavItems = [
+  { href: "/settings?tab=plan", label: "Plan", icon: CreditCard },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -65,6 +67,7 @@ interface SidebarProps {
 
 export function Sidebar({ open = false, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { profile, signOut } = useAuth();
   const totalUnread = useTotalUnread();
 
@@ -193,7 +196,19 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
 
           <ul className="flex flex-col gap-1">
             {bottomNavItems.map((item) => {
-              const isActive = pathname.startsWith(item.href);
+              const isPlan = item.href.includes('tab=plan');
+              const isSettings = item.href === '/settings';
+              const tab = searchParams.get("tab");
+              
+              let isActive = false;
+              if (isPlan) {
+                isActive = tab === "plan";
+              } else if (isSettings) {
+                isActive = pathname === "/settings" && tab !== "plan";
+              } else {
+                isActive = pathname.startsWith(item.href);
+              }
+
               return (
                 <li key={item.href}>
                   <Link
