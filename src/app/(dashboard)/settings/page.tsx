@@ -55,50 +55,53 @@ export default function SettingsPage() {
       </div>
 
       <Tabs value={tab} onValueChange={(v) => onChange(v as TabValue)}>
-        <TabsList className="bg-slate-900 border border-slate-700">
-          <TabsTrigger
-            value="profile"
-            className="data-active:bg-slate-800 data-active:text-primary text-slate-400"
-          >
-            <User className="size-4" />
-            Profile
-          </TabsTrigger>
-          <TabsTrigger
-            value="whatsapp"
-            className="data-active:bg-slate-800 data-active:text-primary text-slate-400"
-          >
-            <Settings className="size-4" />
-            WhatsApp Config
-          </TabsTrigger>
-          <TabsTrigger
-            value="templates"
-            className="data-active:bg-slate-800 data-active:text-primary text-slate-400"
-          >
-            <MessageSquare className="size-4" />
-            Templates
-          </TabsTrigger>
-          <TabsTrigger
-            value="tags"
-            className="data-active:bg-slate-800 data-active:text-primary text-slate-400"
-          >
-            <Tag className="size-4" />
-            Tags
-          </TabsTrigger>
-          <TabsTrigger
-            value="appearance"
-            className="data-active:bg-slate-800 data-active:text-primary text-slate-400"
-          >
-            <Palette className="size-4" />
-            Appearance
-          </TabsTrigger>
-          <TabsTrigger
-            value="plan"
-            className="data-active:bg-slate-800 data-active:text-primary text-slate-400"
-          >
-            <CreditCard className="size-4" />
-            Plan
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto">
+          <TabsList className="bg-slate-900 border border-slate-700 w-max min-w-full flex">
+            <TabsTrigger
+              value="profile"
+              className="data-active:bg-slate-800 data-active:text-primary text-slate-400 flex-shrink-0"
+            >
+              <User className="size-4" />
+              <span className="hidden sm:inline">Profile</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="whatsapp"
+              className="data-active:bg-slate-800 data-active:text-primary text-slate-400 flex-shrink-0"
+            >
+              <Settings className="size-4" />
+              <span className="hidden sm:inline">WhatsApp</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="templates"
+              className="data-active:bg-slate-800 data-active:text-primary text-slate-400 flex-shrink-0"
+            >
+              <MessageSquare className="size-4" />
+              <span className="hidden sm:inline">Templates</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="tags"
+              className="data-active:bg-slate-800 data-active:text-primary text-slate-400 flex-shrink-0"
+            >
+              <Tag className="size-4" />
+              <span className="hidden sm:inline">Tags</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="appearance"
+              className="data-active:bg-slate-800 data-active:text-primary text-slate-400 flex-shrink-0"
+            >
+              <Palette className="size-4" />
+              <span className="hidden sm:inline">Appearance</span>
+            </TabsTrigger>
+            <TabsTrigger
+              value="plan"
+              className="data-active:bg-slate-800 data-active:text-primary text-slate-400 flex-shrink-0"
+            >
+              <CreditCard className="size-4" />
+              <span className="hidden sm:inline">Plan</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
 
         <TabsContent value="profile" className="space-y-6">
           <ProfileForm />
