@@ -245,11 +245,11 @@ export function AutomationBuilder({ initial }: { initial: BuilderInitial }) {
   }
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-background">
+    <div className="flex min-h-screen flex-col bg-background">
       {/* Top bar. At sub-sm widths the "Active" label is hidden and the
           switch moves to the right of the save button, so the name input
           gets maximum width. */}
-      <header className="flex flex-shrink-0 items-center gap-2 border-b border-slate-800 bg-card/80 px-3 py-3 sm:gap-3 sm:px-4">
+      <header className="sticky top-0 z-50 flex flex-shrink-0 items-center gap-2 border-b border-border bg-card/90 backdrop-blur px-3 py-3 sm:gap-3 sm:px-4 shadow-sm">
         <button
           type="button"
           onClick={() => router.push("/automations")}
@@ -283,8 +283,8 @@ export function AutomationBuilder({ initial }: { initial: BuilderInitial }) {
       </header>
 
       {/* Canvas */}
-      <div className="relative flex-1 overflow-y-auto">
-        <div className="absolute inset-0 bg-[radial-gradient(circle,#1e293b_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
+      <div className="relative flex-1">
+        <div className="absolute inset-0 bg-[radial-gradient(circle,#e2e8f0_1px,transparent_1px)] dark:bg-[radial-gradient(circle,#1e293b_1px,transparent_1px)] [background-size:20px_20px] pointer-events-none" />
         <div className="relative mx-auto flex max-w-2xl flex-col items-center gap-0 px-4 py-10">
           <TriggerCard
             type={state.trigger_type}

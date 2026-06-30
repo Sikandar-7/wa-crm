@@ -239,13 +239,16 @@ export default function FlowsPage() {
             `sm:max-w-sm` baked into its default classes. Without the
             sm: prefix our override applies at base only and the
             sm-scoped 384px wins at every real desktop breakpoint. */}
-        <DialogContent className="w-[95vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-card text-foreground p-4 sm:p-6">
-          <DialogHeader>
-            <DialogTitle>Create a new flow</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Start from a template or build from scratch.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="flex flex-col w-[95vw] sm:max-w-4xl max-h-[80dvh] bg-card text-foreground p-0">
+          <div className="p-4 sm:p-6 pb-0">
+            <DialogHeader>
+              <DialogTitle>Create a new flow</DialogTitle>
+              <DialogDescription className="text-muted-foreground">
+                Start from a template or build from scratch.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          <div className="p-4 sm:p-6 pt-2 overflow-y-auto flex-1">
 
           {templates.length > 0 && (
             <div className="space-y-3">
@@ -295,9 +298,10 @@ export default function FlowsPage() {
             />
           </div>
 
-          <DialogFooter>
+          </div>
+          <DialogFooter className="p-4 sm:p-6">
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={() => setCreateOpen(false)}
               disabled={creating}
             >
