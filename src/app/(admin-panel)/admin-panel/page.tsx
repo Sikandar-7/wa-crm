@@ -1,62 +1,59 @@
 import { createClient } from "@/lib/supabase/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Layers } from "lucide-react";
+import { AdminDashboardClient } from "./dashboard-client";
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
 
-  // Get some basic stats
-  const { count: usersCount } = await supabase
-    .from("profiles")
-    .select("*", { count: "exact", head: true });
+  // Stats
+  const [
+    { count: usersCount },
+    { count: pendingCount },
+    { count: activePlansCount },
+    { data: plans },
+    { data: users },
+    { data: requests },
+    { data: messages },
+  ] = await Promise.all([
+    supabase.from("profiles").select("*", { count: "exact", head: true }),
+    supabase.from("subscription_requests").select("*", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("subscriptions").select("*", { count: "exact", head: true }).eq("status", "active"),
+    supabase.from("plans").select("id, name, price, price_pkr, limits"),
+    supabase.from("profiles").select("user_id, full_name, email, role, created_at").order("created_at", { ascending: false }),
+    supabase.from("subscription_requests").select("*, plans(name, price_pkr), profiles!inner(full_name, email)").order("created_at", { ascending: false }),
+    supabase.from("messages").select("id, content_text, created_at, sender_type, conversation_id").order("created_at", { ascending: false }).limit(50),
+  ]);
 
-  const { count: plansCount } = await supabase
-    .from("plans")
-    .select("*", { count: "exact", head: true });
-
-  const { count: activeSubs } = await supabase
+  // Get subscriptions with plan info
+  const { data: subscriptions } = await supabase
     .from("subscriptions")
-    .select("*", { count: "exact", head: true })
-    .eq("status", "active");
+    .select("user_id, plan_id, status, expires_at, payment_method, plans(name, price_pkr)");
+
+  // Compute total revenue from active subscriptions
+  const totalRevenue = subscriptions?.reduce((sum, s: any) => {
+    if (s.status === "active" && s.plans?.price_pkr) {
+      return sum + Number(s.plans.price_pkr);
+    }
+    return sum;
+  }, 0) || 0;
+
+  // Merge subscription data into users
+  const usersWithPlans = users?.map(u => {
+    const sub = subscriptions?.find(s => s.user_id === u.user_id) as any;
+    return { ...u, subscription: sub || null };
+  }) || [];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-white">SaaS Admin Dashboard</h1>
-        <p className="text-slate-400">Overview of your multi-tenant application.</p>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-200">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-slate-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{usersCount || 0}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-200">Available Plans</CardTitle>
-            <Layers className="h-4 w-4 text-slate-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{plansCount || 0}</div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-200">Active Subscriptions</CardTitle>
-            <Users className="h-4 w-4 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{activeSubs || 0}</div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <AdminDashboardClient
+      stats={{
+        totalUsers: usersCount || 0,
+        pendingRequests: pendingCount || 0,
+        activePlans: activePlansCount || 0,
+        totalRevenue,
+      }}
+      plans={plans || []}
+      users={usersWithPlans}
+      requests={(requests as any[]) || []}
+      messages={messages || []}
+    />
   );
 }
