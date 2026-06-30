@@ -33,8 +33,8 @@ export default async function AdminUsersPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-white">Users</h1>
-        <p className="text-slate-400">Manage users and assign SaaS plans.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">Users</h1>
+        <p className="text-muted-foreground">Manage users and assign SaaS plans.</p>
       </div>
       
       <UsersClientPage users={usersWithPlans} plans={plans || []} />

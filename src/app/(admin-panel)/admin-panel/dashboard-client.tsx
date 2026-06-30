@@ -78,7 +78,7 @@ export function AdminDashboardClient({
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-900 p-1 rounded-lg w-full overflow-x-auto">
+      <div className="flex gap-1 bg-card p-1 rounded-lg w-full overflow-x-auto">
         <TabButton active={activeTab === "requests"} onClick={() => setActiveTab("requests")} badge={stats.pendingRequests}>
           Subscription Requests
         </TabButton>
@@ -94,15 +94,15 @@ export function AdminDashboardClient({
       {activeTab === "requests" && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-white">Pending Subscription Requests</h2>
-            <button onClick={() => window.location.reload()} className="flex items-center gap-1 text-xs text-slate-400 hover:text-white">
+            <h2 className="text-lg font-semibold text-foreground">Pending Subscription Requests</h2>
+            <button onClick={() => window.location.reload()} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
               <RefreshCw className="h-3.5 w-3.5" /> Refresh
             </button>
           </div>
-          <div className="rounded-lg border border-slate-800 bg-slate-900 overflow-hidden">
+          <div className="rounded-lg border border-slate-800 bg-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="text-xs text-slate-400 uppercase bg-slate-950 border-b border-slate-800">
+                <thead className="text-xs text-muted-foreground uppercase bg-background border-b border-slate-800">
                   <tr>
                     <th className="px-4 py-3">User</th>
                     <th className="px-4 py-3">Plan</th>
@@ -113,15 +113,15 @@ export function AdminDashboardClient({
                 </thead>
                 <tbody>
                   {pendingRequests.map(req => (
-                    <tr key={req.id} className="border-b border-slate-800 hover:bg-slate-800/40">
+                    <tr key={req.id} className="border-b border-slate-800 hover:bg-secondary border-border/40">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                          <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center text-foreground text-xs font-bold flex-shrink-0">
                             {req.profiles?.full_name?.[0]?.toUpperCase() || "?"}
                           </div>
                           <div>
-                            <p className="font-medium text-white text-sm">{req.profiles?.full_name}</p>
-                            <p className="text-xs text-slate-400">{req.profiles?.email}</p>
+                            <p className="font-medium text-foreground text-sm">{req.profiles?.full_name}</p>
+                            <p className="text-xs text-muted-foreground">{req.profiles?.email}</p>
                           </div>
                         </div>
                       </td>
@@ -130,10 +130,10 @@ export function AdminDashboardClient({
                           {req.plans?.name}
                         </span>
                         {req.plans?.price_pkr > 0 && (
-                          <p className="text-xs text-slate-500 mt-0.5">Rs.{req.plans.price_pkr}/mo</p>
+                          <p className="text-xs text-muted-foreground mt-0.5">Rs.{req.plans.price_pkr}/mo</p>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-slate-300 text-sm">{req.payment_method}</td>
+                      <td className="px-4 py-3 text-muted-foreground text-sm">{req.payment_method}</td>
                       <td className="px-4 py-3">
                         <span className="text-xs font-medium text-orange-400 bg-orange-500/10 px-2 py-1 rounded-full">Pending</span>
                       </td>
@@ -144,14 +144,14 @@ export function AdminDashboardClient({
                             disabled={loadingId === req.id}
                             className="h-7 w-7 rounded-full bg-emerald-600 hover:bg-emerald-500 flex items-center justify-center transition-colors disabled:opacity-50"
                           >
-                            <Check className="h-3.5 w-3.5 text-white" />
+                            <Check className="h-3.5 w-3.5 text-foreground" />
                           </button>
                           <button
                             onClick={() => handleReject(req.id)}
                             disabled={loadingId === req.id}
                             className="h-7 w-7 rounded-full bg-red-600 hover:bg-red-500 flex items-center justify-center transition-colors disabled:opacity-50"
                           >
-                            <X className="h-3.5 w-3.5 text-white" />
+                            <X className="h-3.5 w-3.5 text-foreground" />
                           </button>
                         </div>
                       </td>
@@ -159,7 +159,7 @@ export function AdminDashboardClient({
                   ))}
                   {pendingRequests.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="px-4 py-10 text-center text-slate-500">No pending requests.</td>
+                      <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">No pending requests.</td>
                     </tr>
                   )}
                 </tbody>
@@ -172,8 +172,8 @@ export function AdminDashboardClient({
       {activeTab === "users" && (
         <div className="space-y-3">
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 justify-between">
-            <h2 className="text-lg font-semibold text-white">All Registered Users</h2>
-            <button onClick={() => window.location.reload()} className="flex items-center gap-1 text-xs text-slate-400 hover:text-white">
+            <h2 className="text-lg font-semibold text-foreground">All Registered Users</h2>
+            <button onClick={() => window.location.reload()} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
               <RefreshCw className="h-3.5 w-3.5" /> Refresh
             </button>
           </div>
@@ -181,19 +181,19 @@ export function AdminDashboardClient({
           {/* Filters */}
           <div className="flex flex-col sm:flex-row gap-2">
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <input
                 type="text"
                 placeholder="Search by name or email..."
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-md text-sm text-slate-200 placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="w-full pl-9 pr-4 py-2 bg-card border border-slate-700 rounded-md text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-indigo-500"
               />
             </div>
             <select
               value={planFilter}
               onChange={e => setPlanFilter(e.target.value)}
-              className="bg-slate-900 border border-slate-700 text-sm rounded-md px-3 py-2 text-slate-200"
+              className="bg-card border border-slate-700 text-sm rounded-md px-3 py-2 text-foreground"
             >
               <option value="all">All Plans</option>
               {plans.map(p => (
@@ -202,10 +202,10 @@ export function AdminDashboardClient({
             </select>
           </div>
 
-          <div className="rounded-lg border border-slate-800 bg-slate-900 overflow-hidden">
+          <div className="rounded-lg border border-slate-800 bg-card overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="text-xs text-slate-400 uppercase bg-slate-950 border-b border-slate-800">
+                <thead className="text-xs text-muted-foreground uppercase bg-background border-b border-slate-800">
                   <tr>
                     <th className="px-4 py-3">User</th>
                     <th className="px-4 py-3 hidden sm:table-cell">Email</th>
@@ -218,23 +218,23 @@ export function AdminDashboardClient({
                 </thead>
                 <tbody>
                   {filteredUsers.map(u => (
-                    <tr key={u.user_id} className="border-b border-slate-800 hover:bg-slate-800/40">
+                    <tr key={u.user_id} className="border-b border-slate-800 hover:bg-secondary border-border/40">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <div className="h-7 w-7 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                          <div className="h-7 w-7 rounded-full bg-indigo-600 flex items-center justify-center text-foreground text-xs font-bold flex-shrink-0">
                             {u.full_name?.[0]?.toUpperCase() || "?"}
                           </div>
-                          <span className="font-medium text-white text-sm truncate max-w-[100px]">{u.full_name}</span>
+                          <span className="font-medium text-foreground text-sm truncate max-w-[100px]">{u.full_name}</span>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-slate-400 text-xs hidden sm:table-cell">{u.email}</td>
+                      <td className="px-4 py-3 text-muted-foreground text-xs hidden sm:table-cell">{u.email}</td>
                       <td className="px-4 py-3">
                         {u.subscription?.plans?.name ? (
                           <span className="text-xs font-medium text-blue-400 bg-blue-500/10 px-2 py-1 rounded-full">
                             {u.subscription.plans.name}
                           </span>
                         ) : (
-                          <span className="text-xs text-slate-500">No Plan</span>
+                          <span className="text-xs text-muted-foreground">No Plan</span>
                         )}
                       </td>
                       <td className="px-4 py-3">
@@ -245,13 +245,13 @@ export function AdminDashboardClient({
                         ) : u.subscription?.status === "canceled" ? (
                           <span className="text-xs font-medium text-red-400 bg-red-500/10 px-2 py-1 rounded-full w-fit">Declined</span>
                         ) : (
-                          <span className="text-xs text-slate-500">—</span>
+                          <span className="text-xs text-muted-foreground">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3 text-xs text-slate-400 hidden md:table-cell">
+                      <td className="px-4 py-3 text-xs text-muted-foreground hidden md:table-cell">
                         {u.created_at ? format(new Date(u.created_at), "dd MMM yyyy") : "—"}
                       </td>
-                      <td className="px-4 py-3 text-xs text-slate-400 hidden md:table-cell">
+                      <td className="px-4 py-3 text-xs text-muted-foreground hidden md:table-cell">
                         {u.subscription?.expires_at ? format(new Date(u.subscription.expires_at), "dd MMM yyyy") : "—"}
                       </td>
                       <td className="px-4 py-3">
@@ -260,7 +260,7 @@ export function AdminDashboardClient({
                             <button
                               onClick={() => handleDecline(u.user_id)}
                               disabled={loadingId === u.user_id + "-decline"}
-                              className="px-2 py-1 text-[10px] font-medium rounded bg-red-600 hover:bg-red-500 text-white transition-colors disabled:opacity-50"
+                              className="px-2 py-1 text-[10px] font-medium rounded bg-red-600 hover:bg-red-500 text-foreground transition-colors disabled:opacity-50"
                             >
                               Decline
                             </button>
@@ -269,7 +269,7 @@ export function AdminDashboardClient({
                             defaultValue={u.subscription?.plan_id || ""}
                             onChange={e => handleAssign(u.user_id, e.target.value)}
                             disabled={loadingId === u.user_id}
-                            className="px-1.5 py-1 text-[10px] rounded bg-blue-600 hover:bg-blue-500 text-white border-0 focus:outline-none cursor-pointer"
+                            className="px-1.5 py-1 text-[10px] rounded bg-blue-600 hover:bg-blue-500 text-foreground border-0 focus:outline-none cursor-pointer"
                           >
                             <option value="" disabled>Pass Plan</option>
                             {plans.map(p => (
@@ -279,7 +279,7 @@ export function AdminDashboardClient({
                           <button
                             onClick={() => handleDelete(u.user_id)}
                             disabled={loadingId === u.user_id + "-delete"}
-                            className="px-2 py-1 text-[10px] font-medium rounded bg-slate-700 hover:bg-slate-600 text-white transition-colors disabled:opacity-50"
+                            className="px-2 py-1 text-[10px] font-medium rounded bg-slate-700 hover:bg-slate-600 text-foreground transition-colors disabled:opacity-50"
                           >
                             <Trash2 className="h-3 w-3" />
                           </button>
@@ -289,7 +289,7 @@ export function AdminDashboardClient({
                   ))}
                   {filteredUsers.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="px-4 py-10 text-center text-slate-500">No users found.</td>
+                      <td colSpan={7} className="px-4 py-10 text-center text-muted-foreground">No users found.</td>
                     </tr>
                   )}
                 </tbody>
@@ -301,26 +301,26 @@ export function AdminDashboardClient({
 
       {activeTab === "messages" && (
         <div className="space-y-3">
-          <h2 className="text-lg font-semibold text-white">Recent Messages Log</h2>
-          <div className="rounded-lg border border-slate-800 bg-slate-900 divide-y divide-slate-800">
+          <h2 className="text-lg font-semibold text-foreground">Recent Messages Log</h2>
+          <div className="rounded-lg border border-slate-800 bg-card divide-y divide-slate-800">
             {messages.map(msg => (
               <div key={msg.id} className="px-4 py-3 flex items-start gap-3">
                 <div className={`h-7 w-7 rounded-full flex items-center justify-center flex-shrink-0 ${msg.sender_type === 'agent' ? 'bg-indigo-600' : 'bg-emerald-600'}`}>
-                  <MessageSquare className="h-3.5 w-3.5 text-white" />
+                  <MessageSquare className="h-3.5 w-3.5 text-foreground" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${msg.sender_type === 'agent' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-emerald-500/10 text-emerald-400'}`}>
                       {msg.sender_type}
                     </span>
-                    <span className="text-[10px] text-slate-500">{msg.created_at ? format(new Date(msg.created_at), "dd MMM yyyy, HH:mm") : ""}</span>
+                    <span className="text-[10px] text-muted-foreground">{msg.created_at ? format(new Date(msg.created_at), "dd MMM yyyy, HH:mm") : ""}</span>
                   </div>
-                  <p className="text-sm text-slate-300 mt-1 truncate">{msg.content_text || "(media)"}</p>
+                  <p className="text-sm text-muted-foreground mt-1 truncate">{msg.content_text || "(media)"}</p>
                 </div>
               </div>
             ))}
             {messages.length === 0 && (
-              <div className="px-4 py-10 text-center text-slate-500">No messages found.</div>
+              <div className="px-4 py-10 text-center text-muted-foreground">No messages found.</div>
             )}
           </div>
         </div>
@@ -331,9 +331,9 @@ export function AdminDashboardClient({
 
 function StatCard({ icon, label, value, color }: { icon: React.ReactNode; label: string; value: any; color: string }) {
   return (
-    <div className="rounded-lg border border-slate-800 bg-slate-900 p-4">
+    <div className="rounded-lg border border-slate-800 bg-card p-4">
       <div className="flex items-center justify-between mb-2">
-        <p className="text-xs text-slate-400 uppercase tracking-wide">{label}</p>
+        <p className="text-xs text-muted-foreground uppercase tracking-wide">{label}</p>
         {icon}
       </div>
       <p className={`text-2xl font-bold text-${color}-400`}>{value}</p>
@@ -346,12 +346,12 @@ function TabButton({ active, onClick, children, badge }: { active: boolean; onCl
     <button
       onClick={onClick}
       className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-        active ? "bg-indigo-600 text-white" : "text-slate-400 hover:text-white hover:bg-slate-800"
+        active ? "bg-indigo-600 text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-secondary border-border"
       }`}
     >
       {children}
       {badge != null && badge > 0 && (
-        <span className="h-5 min-w-5 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+        <span className="h-5 min-w-5 px-1 rounded-full bg-red-500 text-foreground text-[10px] font-bold flex items-center justify-center">
           {badge}
         </span>
       )}

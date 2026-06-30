@@ -20,7 +20,7 @@ export function BottomNav() {
   const totalUnread = useTotalUnread();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-slate-800 bg-slate-900 pb-safe pt-1 lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-slate-800 bg-card pb-safe pt-1 lg:hidden">
       {bottomNavItems.map((item) => {
         const isPlan = item.href.includes('tab=plan');
         const isSettings = item.href === '/settings';
@@ -43,7 +43,7 @@ export function BottomNav() {
             href={item.href}
             className={cn(
               "relative flex flex-1 flex-col items-center justify-center gap-1 py-1 transition-colors",
-              isActive ? "text-primary" : "text-slate-400 hover:text-slate-200"
+              isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
             )}
           >
             <div className="relative">

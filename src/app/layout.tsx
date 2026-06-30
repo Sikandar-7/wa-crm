@@ -3,7 +3,8 @@ import { Inter } from "next/font/google";
 import Script from "next/script";
 import { Toaster } from "sonner";
 import "./globals.css";
-import { ThemeProvider } from "@/hooks/use-theme";
+import { ThemeProvider as ColorThemeProvider } from "@/hooks/use-theme";
+import { ThemeProvider as NextThemeProvider } from "@/components/theme-provider";
 import { DEFAULT_THEME, STORAGE_KEY, THEME_IDS } from "@/lib/themes";
 
 const inter = Inter({
@@ -80,20 +81,12 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full bg-background text-foreground font-sans">
-        <ThemeProvider>
-          {children}
-          <Toaster
-            theme="dark"
-            position="top-right"
-            toastOptions={{
-              style: {
-                background: "rgb(30 41 59)",
-                border: "1px solid rgb(51 65 85)",
-                color: "white",
-              },
-            }}
-          />
-        </ThemeProvider>
+        <NextThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+          <ColorThemeProvider>
+            {children}
+            <Toaster position="top-right" />
+          </ColorThemeProvider>
+        </NextThemeProvider>
       </body>
     </html>
   );

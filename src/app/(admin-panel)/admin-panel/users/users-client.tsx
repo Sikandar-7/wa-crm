@@ -35,10 +35,10 @@ export function UsersClientPage({ users, plans }: { users: UserType[], plans: Pl
   };
 
   return (
-    <div className="rounded-md border border-slate-800 bg-slate-900">
+    <div className="rounded-md border border-slate-800 bg-card">
       <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left text-slate-300">
-          <thead className="text-xs text-slate-400 uppercase bg-slate-950 border-b border-slate-800">
+        <table className="w-full text-sm text-left text-muted-foreground">
+          <thead className="text-xs text-muted-foreground uppercase bg-background border-b border-slate-800">
             <tr>
               <th className="px-6 py-4">User</th>
               <th className="px-6 py-4">Email</th>
@@ -49,19 +49,19 @@ export function UsersClientPage({ users, plans }: { users: UserType[], plans: Pl
           </thead>
           <tbody>
             {users.map((user) => (
-              <tr key={user.user_id} className="border-b border-slate-800 hover:bg-slate-800/50">
-                <td className="px-6 py-4 font-medium text-white">{user.full_name || "N/A"}</td>
+              <tr key={user.user_id} className="border-b border-slate-800 hover:bg-secondary border-border/50">
+                <td className="px-6 py-4 font-medium text-foreground">{user.full_name || "N/A"}</td>
                 <td className="px-6 py-4">{user.email}</td>
                 <td className="px-6 py-4">
                   <span className={`px-2 py-1 rounded-full text-[10px] uppercase font-bold ${
-                    user.role === 'admin' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-slate-800 text-slate-300'
+                    user.role === 'admin' ? 'bg-indigo-500/10 text-indigo-400' : 'bg-secondary border-border text-muted-foreground'
                   }`}>
                     {user.role}
                   </span>
                 </td>
                 <td className="px-6 py-4">
                   <select 
-                    className="bg-slate-950 border border-slate-700 text-sm rounded-md focus:ring-primary focus:border-primary block p-2"
+                    className="bg-background border border-slate-700 text-sm rounded-md focus:ring-primary focus:border-primary block p-2"
                     defaultValue={user.plan_id || ""}
                     onChange={(e) => handleAssignPlan(user.user_id, e.target.value)}
                     disabled={loadingId === user.user_id}
@@ -74,7 +74,7 @@ export function UsersClientPage({ users, plans }: { users: UserType[], plans: Pl
                 </td>
                 <td className="px-6 py-4 text-right">
                   {loadingId === user.user_id ? (
-                    <span className="text-xs text-slate-400">Updating...</span>
+                    <span className="text-xs text-muted-foreground">Updating...</span>
                   ) : (
                     <span className="text-xs text-emerald-500">{user.status === 'active' ? 'Active' : ''}</span>
                   )}
@@ -83,7 +83,7 @@ export function UsersClientPage({ users, plans }: { users: UserType[], plans: Pl
             ))}
             {users.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-slate-500">
+                <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
                   No users found.
                 </td>
               </tr>
