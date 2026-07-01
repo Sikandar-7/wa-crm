@@ -305,7 +305,7 @@ export default function FlowsPage() {
             />
           </div>
 
-          </div>
+
           <DialogFooter className="p-4 sm:p-6">
             <Button
               variant="outline"
