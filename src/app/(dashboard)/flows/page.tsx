@@ -18,7 +18,9 @@ import {
   FileText,
 } from "lucide-react";
 
+import { useCan } from "@/hooks/use-can";
 import { Button } from "@/components/ui/button";
+import { GatedButton } from "@/components/ui/gated-button";
 import {
   Dialog,
   DialogContent,
@@ -59,9 +61,9 @@ const STATUS_LABELS: Record<FlowRow["status"], string> = {
 };
 
 const STATUS_COLORS: Record<FlowRow["status"], string> = {
-  draft: "border-slate-700 bg-secondary border-border text-muted-foreground",
+  draft: "border-border bg-muted text-muted-foreground",
   active: "border-emerald-600/40 bg-emerald-500/10 text-emerald-300",
-  archived: "border-slate-700 bg-secondary border-border/50 text-muted-foreground",
+  archived: "border-border bg-muted/50 text-muted-foreground",
 };
 
 interface TemplateSummary {
@@ -81,6 +83,7 @@ const TEMPLATE_ICONS = {
 
 export default function FlowsPage() {
   const router = useRouter();
+  const canCreate = useCan("send-messages");
   const [flows, setFlows] = useState<FlowRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [createOpen, setCreateOpen] = useState(false);
@@ -213,14 +216,21 @@ export default function FlowsPage() {
             menus, FAQs, and triage before a human steps in.
           </p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>
+        <GatedButton
+          canAct={canCreate}
+          gateReason="create flows"
+          onClick={() => setCreateOpen(true)}
+        >
           <Plus className="h-4 w-4" />
           New flow
-        </Button>
+        </GatedButton>
       </header>
 
       {flows.length === 0 ? (
-        <EmptyState onCreate={() => setCreateOpen(true)} />
+        <EmptyState
+          onCreate={() => setCreateOpen(true)}
+          canCreate={canCreate}
+        />
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {flows.map((flow) => (
@@ -239,16 +249,13 @@ export default function FlowsPage() {
             `sm:max-w-sm` baked into its default classes. Without the
             sm: prefix our override applies at base only and the
             sm-scoped 384px wins at every real desktop breakpoint. */}
-        <DialogContent className="flex flex-col w-[95vw] sm:max-w-4xl max-h-[80dvh] bg-card text-foreground p-0">
-          <div className="p-4 sm:p-6 pb-0">
-            <DialogHeader>
-              <DialogTitle>Create a new flow</DialogTitle>
-              <DialogDescription className="text-muted-foreground">
-                Start from a template or build from scratch.
-              </DialogDescription>
-            </DialogHeader>
-          </div>
-          <div className="p-4 sm:p-6 pt-2 overflow-y-auto flex-1">
+        <DialogContent className="sm:max-w-4xl bg-popover text-popover-foreground">
+          <DialogHeader>
+            <DialogTitle>Create a new flow</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
+              Start from a template or build from scratch.
+            </DialogDescription>
+          </DialogHeader>
 
           {templates.length > 0 && (
             <div className="space-y-3">
@@ -264,16 +271,16 @@ export default function FlowsPage() {
                       type="button"
                       onClick={() => handleUseTemplate(t.slug)}
                       disabled={creating}
-                      className="flex flex-col gap-2.5 rounded-lg border border-slate-800 bg-background p-4 text-left transition-colors hover:border-primary/40 hover:bg-secondary border-border disabled:opacity-50"
+                      className="flex flex-col gap-2.5 rounded-lg border border-border bg-background p-4 text-left transition-colors hover:border-primary/40 hover:bg-muted disabled:opacity-50"
                     >
                       <Icon className="h-5 w-5 text-primary" />
-                      <span className="text-sm font-semibold text-foreground">
+                      <span className="text-sm font-semibold text-popover-foreground">
                         {t.name}
                       </span>
                       <span className="text-xs leading-relaxed text-muted-foreground">
                         {t.description}
                       </span>
-                      <span className="mt-auto border-t border-slate-800 pt-2 text-[11px] text-muted-foreground">
+                      <span className="mt-auto border-t border-border pt-2 text-[11px] text-muted-foreground">
                         {t.node_count} {t.node_count === 1 ? "node" : "nodes"}
                       </span>
                     </button>
@@ -283,7 +290,7 @@ export default function FlowsPage() {
             </div>
           )}
 
-          <div className="space-y-2 border-t border-slate-800 pt-4">
+          <div className="space-y-2 border-t border-border pt-4">
             <p className="text-xs uppercase tracking-wide text-muted-foreground">
               Or start blank
             </p>
@@ -291,7 +298,7 @@ export default function FlowsPage() {
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder="e.g. Welcome menu"
-              className="bg-secondary border-border"
+              className="bg-muted"
               onKeyDown={(e) => {
                 if (e.key === "Enter") handleCreate();
               }}
@@ -318,10 +325,16 @@ export default function FlowsPage() {
   );
 }
 
-function EmptyState({ onCreate }: { onCreate: () => void }) {
+function EmptyState({
+  onCreate,
+  canCreate,
+}: {
+  onCreate: () => void;
+  canCreate: boolean;
+}) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-slate-700 bg-card/50 px-6 py-16 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-secondary border-border">
+    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border bg-card/50 px-6 py-16 text-center">
+      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
         <Workflow className="h-6 w-6 text-muted-foreground" />
       </div>
       <h2 className="mt-4 text-base font-medium text-foreground">
@@ -332,10 +345,15 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
         bot. Customers tap buttons; the bot routes them to the right answer (or
         the right agent).
       </p>
-      <Button onClick={onCreate} className="mt-5">
+      <GatedButton
+        canAct={canCreate}
+        gateReason="create flows"
+        onClick={onCreate}
+        className="mt-5"
+      >
         <Plus className="h-4 w-4" />
         Create your first flow
-      </Button>
+      </GatedButton>
     </div>
   );
 }
@@ -357,7 +375,7 @@ function FlowCard({
         ? Archive
         : PauseCircle;
   return (
-    <div className="flex flex-col rounded-lg border border-slate-800 bg-card p-4 transition-colors hover:border-slate-700">
+    <div className="flex flex-col rounded-lg border border-border bg-card p-4 transition-colors hover:border-border">
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <Workflow className="h-4 w-4 shrink-0 text-primary" />
@@ -388,7 +406,7 @@ function FlowCard({
         </span>
       </div>
 
-      <div className="mt-4 flex items-center justify-end gap-2 border-t border-slate-800 pt-3">
+      <div className="mt-4 flex items-center justify-end gap-2 border-t border-border pt-3">
         <Button variant="ghost" size="sm" onClick={onEdit}>
           <Pencil className="h-3.5 w-3.5" />
           Edit

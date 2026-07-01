@@ -87,7 +87,7 @@ export default function AutomationLogsPage({
         <button
           type="button"
           onClick={() => router.push("/automations")}
-          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary border-border hover:text-foreground"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           aria-label="Back"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -99,7 +99,7 @@ export default function AutomationLogsPage({
       </div>
 
       {logs.length === 0 ? (
-        <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-slate-800 bg-card/40">
+        <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card/40">
           <p className="text-sm text-foreground">No executions yet</p>
           <p className="mt-1 text-xs text-muted-foreground">
             Trigger this automation to see runs here.
@@ -112,7 +112,7 @@ export default function AutomationLogsPage({
             return (
               <li
                 key={log.id}
-                className="rounded-xl border border-slate-800 bg-card"
+                className="rounded-xl border border-border bg-card"
               >
                 <button
                   type="button"
@@ -139,7 +139,7 @@ export default function AutomationLogsPage({
                   </div>
                 </button>
                 {isOpen && (
-                  <div className="border-t border-slate-800 px-4 py-3">
+                  <div className="border-t border-border px-4 py-3">
                     {log.error_message && (
                       <p className="mb-3 rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
                         {log.error_message}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/hooks/use-auth';
 import { toast } from 'sonner';
 import { MessageTemplate } from '@/types';
 import { Step1ChooseTemplate } from '@/components/broadcasts/step1-choose-template';
@@ -21,6 +22,7 @@ const steps = [
 
 export default function NewBroadcastPage() {
   const router = useRouter();
+  const { accountId } = useAuth();
   const { createAndSendBroadcast, isProcessing, progress } = useBroadcastSending();
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -39,6 +41,7 @@ export default function NewBroadcastPage() {
   const [variables, setVariables] = useState<
     Record<string, { type: 'static' | 'field' | 'custom_field'; value: string }>
   >({});
+  const [headerMediaUrl, setHeaderMediaUrl] = useState('');
   const [name, setName] = useState('');
 
   async function handleSend() {
@@ -56,6 +59,7 @@ export default function NewBroadcastPage() {
           excludeTagIds: audience.excludeTagIds,
         },
         variables,
+        headerMediaUrl,
       });
       router.push(`/broadcasts/${broadcastId}`);
     } catch (err) {
@@ -90,9 +94,14 @@ export default function NewBroadcastPage() {
       toast.error('Not signed in.');
       return;
     }
+    if (!accountId) {
+      toast.error('Your profile is not linked to an account.');
+      return;
+    }
 
     const { error } = await supabase.from('broadcasts').insert({
       user_id: user.id,
+      account_id: accountId,
       name: name.trim(),
       template_name: template.name,
       template_language: template.language ?? 'en_US',
@@ -143,7 +152,7 @@ export default function NewBroadcastPage() {
                       ? 'bg-primary text-primary-foreground'
                       : isActive
                         ? 'border-2 border-primary bg-primary/10 text-primary'
-                        : 'border border-slate-700 bg-secondary border-border text-muted-foreground'
+                        : 'border border-border bg-muted text-muted-foreground'
                   }`}
                 >
                   {isCompleted ? <Check className="h-4 w-4" /> : index + 1}
@@ -159,7 +168,7 @@ export default function NewBroadcastPage() {
               {index < steps.length - 1 && (
                 <div
                   className={`mx-3 h-px flex-1 ${
-                    index < currentStep ? 'bg-primary' : 'bg-secondary border-border'
+                    index < currentStep ? 'bg-primary' : 'bg-muted'
                   }`}
                 />
               )}
@@ -198,6 +207,8 @@ export default function NewBroadcastPage() {
               template={template}
               variables={variables}
               onUpdate={setVariables}
+              headerMediaUrl={headerMediaUrl}
+              onHeaderMediaUrlChange={setHeaderMediaUrl}
               onNext={() => setCurrentStep(3)}
               onBack={() => setCurrentStep(1)}
             />

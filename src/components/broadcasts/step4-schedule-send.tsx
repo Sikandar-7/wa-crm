@@ -106,12 +106,12 @@ export function Step4ScheduleSend({
           value={name}
           onChange={(e) => onNameChange(e.target.value)}
           placeholder="e.g. Summer Sale Announcement"
-          className="border-slate-700 bg-secondary border-border text-foreground placeholder:text-muted-foreground"
+          className="border-border bg-muted text-foreground placeholder:text-muted-foreground"
         />
       </div>
 
       {/* Summary Card */}
-      <div className="rounded-xl border border-slate-800 bg-card/50 p-4 space-y-3">
+      <div className="rounded-xl border border-border bg-card/50 p-4 space-y-3">
         <p className="text-sm font-medium text-foreground">Summary</p>
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
@@ -152,7 +152,7 @@ export function Step4ScheduleSend({
             </div>
             <span className="text-xs font-medium text-primary">{progress}%</span>
           </div>
-          <div className="h-1.5 w-full rounded-full bg-secondary border-border">
+          <div className="h-1.5 w-full rounded-full bg-muted">
             <div
               className="h-1.5 rounded-full bg-primary transition-all duration-300"
               style={{ width: `${progress}%` }}
@@ -161,12 +161,12 @@ export function Step4ScheduleSend({
         </div>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800 pt-4">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border pt-4">
         <Button
           variant="outline"
           onClick={onBack}
           disabled={isProcessing}
-          className="border-slate-700 text-muted-foreground"
+          className="border-border text-muted-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
           Back
@@ -178,7 +178,7 @@ export function Step4ScheduleSend({
               variant="outline"
               onClick={onSaveDraft}
               disabled={!name.trim() || isProcessing}
-              className="border-slate-700 text-muted-foreground hover:bg-secondary border-border disabled:opacity-50"
+              className="border-border text-muted-foreground hover:bg-muted disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
               Save as Draft
@@ -197,14 +197,14 @@ export function Step4ScheduleSend({
             <Send className="h-4 w-4" />
             Send Broadcast
           </DialogTrigger>
-          <DialogContent className="border-slate-700 bg-card sm:max-w-md">
+          <DialogContent className="border-border bg-popover sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="text-foreground">Confirm Broadcast</DialogTitle>
+              <DialogTitle className="text-popover-foreground">Confirm Broadcast</DialogTitle>
               <DialogDescription className="text-muted-foreground">
                 You are about to send this broadcast to{' '}
-                <span className="font-medium text-foreground">{estimatedReach.toLocaleString()}</span>{' '}
+                <span className="font-medium text-popover-foreground">{estimatedReach.toLocaleString()}</span>{' '}
                 contacts using the{' '}
-                <span className="font-medium text-foreground">{template.name}</span> template.
+                <span className="font-medium text-popover-foreground">{template.name}</span> template.
                 This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
@@ -212,7 +212,7 @@ export function Step4ScheduleSend({
               <Button
                 variant="outline"
                 onClick={() => setShowConfirm(false)}
-                className="border-slate-700 text-muted-foreground"
+                className="border-border text-muted-foreground"
               >
                 Cancel
               </Button>

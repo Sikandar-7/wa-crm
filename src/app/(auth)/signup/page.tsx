@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,9 +14,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MessageSquare, CheckCircle } from "lucide-react";
+import { MessageSquare, CheckCircle, UsersRound } from "lucide-react";
 
+// `useSearchParams` opts the component out of static prerendering
+// unless wrapped in Suspense — same pattern as /login.
 export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupPageInner />
+    </Suspense>
+  );
+}
+
+function SignupPageInner() {
+  const searchParams = useSearchParams();
+  // When the user lands here from `/join/<token>` we carry the
+  // invite token in the query so it survives the signup → email
+  // verification → redirect round-trip. `emailRedirectTo` below
+  // points back at /join/<token> so the user lands on the redeem
+  // step after verifying instead of being dropped on /dashboard.
+  const inviteToken = searchParams.get("invite");
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,6 +68,14 @@ export default function SignupPage() {
 
     setLoading(true);
 
+    // If we have an invite token, point Supabase's verification
+    // email back at the join page so the user can accept after
+    // verifying. Without a token, Supabase uses its default
+    // redirect (the app root).
+    const emailRedirectTo = inviteToken
+      ? `${window.location.origin}/join/${encodeURIComponent(inviteToken)}`
+      : undefined;
+
     const { error } = await supabase.auth.signUp({
       email: normalizedEmail,
       password,
@@ -56,6 +83,7 @@ export default function SignupPage() {
         data: {
           full_name: normalizedFullName,
         },
+        ...(emailRedirectTo ? { emailRedirectTo } : {}),
       },
     });
 
@@ -72,7 +100,7 @@ export default function SignupPage() {
   if (success) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
-        <Card className="w-full max-w-md border-slate-800 bg-card">
+        <Card className="w-full max-w-md border-border bg-card">
           <CardHeader className="items-center text-center">
             <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
               <CheckCircle className="h-6 w-6 text-primary" />
@@ -87,10 +115,16 @@ export default function SignupPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/login">
+            <Link
+              href={
+                inviteToken
+                  ? `/login?invite=${encodeURIComponent(inviteToken)}`
+                  : "/login"
+              }
+            >
               <Button
                 variant="outline"
-                className="w-full border-slate-700 text-muted-foreground hover:bg-secondary border-border hover:text-foreground"
+                className="w-full border-border text-muted-foreground hover:bg-muted hover:text-foreground"
               >
                 Back to sign in
               </Button>
@@ -103,14 +137,22 @@ export default function SignupPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md border-slate-800 bg-card">
+      <Card className="w-full max-w-md border-border bg-card">
         <CardHeader className="items-center text-center">
           <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-            <MessageSquare className="h-6 w-6 text-primary" />
+            {inviteToken ? (
+              <UsersRound className="h-6 w-6 text-primary" />
+            ) : (
+              <MessageSquare className="h-6 w-6 text-primary" />
+            )}
           </div>
-          <CardTitle className="text-xl text-foreground">Create account</CardTitle>
+          <CardTitle className="text-xl text-foreground">
+            {inviteToken ? "Create account & join" : "Create account"}
+          </CardTitle>
           <CardDescription className="text-muted-foreground">
-            Get started with CRM Template for WhatsApp
+            {inviteToken
+              ? "Verify your email, then accept the invitation to join your team."
+              : "Get started with CRM Template for WhatsApp"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -132,7 +174,7 @@ export default function SignupPage() {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                className="border-slate-700 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
               />
             </div>
 
@@ -147,7 +189,7 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="border-slate-700 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
               />
             </div>
 
@@ -162,7 +204,7 @@ export default function SignupPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="border-slate-700 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
               />
             </div>
 
@@ -177,7 +219,7 @@ export default function SignupPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
-                className="border-slate-700 bg-secondary border-border text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
+                className="border-border bg-muted text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-primary/20"
               />
             </div>
 
@@ -193,7 +235,11 @@ export default function SignupPage() {
           <p className="mt-6 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link
-              href="/login"
+              href={
+                inviteToken
+                  ? `/login?invite=${encodeURIComponent(inviteToken)}`
+                  : "/login"
+              }
               className="text-primary hover:text-primary/80"
             >
               Sign in

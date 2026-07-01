@@ -50,7 +50,7 @@ interface StatCardProps {
 function StatCard({ label, value, total, icon, color }: StatCardProps) {
   const pct = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
-    <div className="rounded-xl border border-slate-800 bg-card p-4">
+    <div className="rounded-xl border border-border bg-card p-4">
       <div className="flex items-center justify-between">
         <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${color}`}>
           {icon}
@@ -77,7 +77,7 @@ interface FunnelStep {
 function FunnelChart({ steps }: { steps: FunnelStep[] }) {
   const max = Math.max(...steps.map((s) => s.value), 1);
   return (
-    <div className="rounded-xl border border-slate-800 bg-card p-4">
+    <div className="rounded-xl border border-border bg-card p-4">
       <h3 className="mb-4 text-sm font-medium text-foreground">Funnel</h3>
       <div className="space-y-2">
         {steps.map((step) => {
@@ -91,7 +91,7 @@ function FunnelChart({ steps }: { steps: FunnelStep[] }) {
               <span className="w-20 shrink-0 text-xs text-muted-foreground">
                 {step.label}
               </span>
-              <div className="relative h-7 flex-1 rounded-full bg-secondary border-border">
+              <div className="relative h-7 flex-1 rounded-full bg-muted">
                 <div
                   className={`h-7 rounded-full ${step.color} transition-[width] duration-500`}
                   style={{ width: `${pctOfMax}%` }}
@@ -280,7 +280,7 @@ export default function BroadcastDetailPage() {
             variant="outline"
             size="icon"
             onClick={() => router.push('/broadcasts')}
-            className="border-slate-700"
+            className="border-border"
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
@@ -315,7 +315,7 @@ export default function BroadcastDetailPage() {
               size="sm"
               onClick={() => setConfirmDelete(false)}
               disabled={deleting}
-              className="h-7 border-slate-700 bg-transparent text-muted-foreground hover:bg-secondary border-border"
+              className="h-7 border-border bg-transparent text-muted-foreground hover:bg-muted"
             >
               Cancel
             </Button>
@@ -354,7 +354,7 @@ export default function BroadcastDetailPage() {
           value={broadcast.total_recipients}
           total={broadcast.total_recipients}
           icon={<Users className="h-4 w-4" />}
-          color="bg-secondary border-border text-muted-foreground"
+          color="bg-muted text-muted-foreground"
         />
         <StatCard
           label="Sent"
@@ -396,8 +396,8 @@ export default function BroadcastDetailPage() {
       <FunnelChart steps={funnelSteps} />
 
       {/* Recipients Table */}
-      <div className="rounded-xl border border-slate-800 bg-card">
-        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 px-4 py-3">
+      <div className="rounded-xl border border-border bg-card">
+        <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
           <h2 className="text-sm font-medium text-foreground">
             Recipients ({filteredRecipients.length}
             {statusFilter !== 'all' ? ` of ${recipients.length}` : ''})
@@ -409,7 +409,7 @@ export default function BroadcastDetailPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-slate-700 text-muted-foreground hover:bg-secondary border-border"
+                    className="border-border text-muted-foreground hover:bg-muted"
                   />
                 }
               >
@@ -419,11 +419,11 @@ export default function BroadcastDetailPage() {
                   : getRecipientStatus(statusFilter).label}
                 <ChevronDown className="h-3 w-3" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="border-slate-700 bg-card">
+              <DropdownMenuContent className="border-border bg-popover">
                 <DropdownMenuItem
                   onClick={() => setStatusFilter('all')}
                   className={
-                    statusFilter === 'all' ? 'text-primary' : 'text-muted-foreground'
+                    statusFilter === 'all' ? 'text-primary' : 'text-popover-foreground'
                   }
                 >
                   All statuses
@@ -435,7 +435,7 @@ export default function BroadcastDetailPage() {
                     className={
                       statusFilter === s
                         ? 'text-primary'
-                        : 'text-muted-foreground'
+                        : 'text-popover-foreground'
                     }
                   >
                     {getRecipientStatus(s).label}
@@ -449,7 +449,7 @@ export default function BroadcastDetailPage() {
               size="sm"
               onClick={handleExport}
               disabled={recipients.length === 0}
-              className="border-slate-700 text-muted-foreground hover:bg-secondary border-border"
+              className="border-border text-muted-foreground hover:bg-muted"
             >
               <Download className="h-3.5 w-3.5" />
               Export CSV
@@ -469,7 +469,7 @@ export default function BroadcastDetailPage() {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="border-slate-800 hover:bg-transparent">
+                <TableRow className="border-border hover:bg-transparent">
                   <TableHead className="text-muted-foreground">Contact</TableHead>
                   <TableHead className="text-muted-foreground">Phone</TableHead>
                   <TableHead className="text-muted-foreground">Status</TableHead>
@@ -483,7 +483,7 @@ export default function BroadcastDetailPage() {
                 {filteredRecipients.map((recipient) => {
                   const rStatus = getRecipientStatus(recipient.status);
                   return (
-                    <TableRow key={recipient.id} className="border-slate-800">
+                    <TableRow key={recipient.id} className="border-border">
                       <TableCell className="font-medium text-foreground">
                         {recipient.contact?.name ?? 'Unknown'}
                       </TableCell>

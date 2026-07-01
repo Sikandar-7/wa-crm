@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { sendTextMessage, sendTemplateMessage } from '@/lib/whatsapp/meta-api'
+import {
+  sendTextMessage,
+  sendTemplateMessage,
+  sendMediaMessage,
+  type MediaKind,
+} from '@/lib/whatsapp/meta-api'
 import { decrypt, encrypt, isLegacyFormat } from '@/lib/whatsapp/encryption'
 import { supabaseAdmin } from '@/lib/flows/admin-client'
 import {
@@ -14,6 +19,8 @@ import {
   rateLimitResponse,
   RATE_LIMITS,
 } from '@/lib/rate-limit'
+import type { MessageTemplate } from '@/types'
+import { isMessageTemplate } from '@/lib/whatsapp/template-row-guard'
 
 export async function POST(request: Request) {
   try {
@@ -38,20 +45,62 @@ export async function POST(request: Request) {
       return rateLimitResponse(limit)
     }
 
+    // Resolve the caller's account_id. Every downstream lookup
+    // (conversation, whatsapp_config, message_templates) is account-
+    // scoped post-multi-user, so the previous `user_id` filters
+    // returned nothing for teammates who didn't author the row.
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('account_id')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    const accountId = profile?.account_id as string | undefined
+    if (!accountId) {
+      return NextResponse.json(
+        { error: 'Your profile is not linked to an account.' },
+        { status: 403 },
+      )
+    }
+
     const body = await request.json()
     const {
-      conversation_id,
+      // `conversation_id` targets an existing thread (inbox). `contact_id`
+      // lets a caller initiate from a contact that may have no conversation
+      // yet (Contact detail → Send template) — we find-or-create one below.
+      conversation_id: conversationIdInput,
+      contact_id,
       message_type,
       content_text,
       media_url,
+      filename,
       template_name,
+      template_language,
       template_params,
+      template_message_params,
       reply_to_message_id,
     } = body
 
-    if (!conversation_id || !message_type) {
+    if ((!conversationIdInput && !contact_id) || !message_type) {
       return NextResponse.json(
-        { error: 'conversation_id and message_type are required' },
+        {
+          error:
+            'Either conversation_id or contact_id, plus message_type, are required',
+        },
+        { status: 400 }
+      )
+    }
+
+    // Media kinds (image/video/document/audio) are sent to Meta via a
+    // public URL the composer already uploaded to the chat-media bucket.
+    const MEDIA_KINDS = ['image', 'video', 'document', 'audio'] as const
+    const isMediaKind = (MEDIA_KINDS as readonly string[]).includes(message_type)
+
+    // Reject anything outside the known set up front rather than letting
+    // an unknown type fall through to the text path with empty content.
+    const VALID_MESSAGE_TYPES = ['text', 'template', ...MEDIA_KINDS] as const
+    if (!(VALID_MESSAGE_TYPES as readonly string[]).includes(message_type)) {
+      return NextResponse.json(
+        { error: `Unsupported message_type "${message_type}"` },
         { status: 400 }
       )
     }
@@ -70,20 +119,89 @@ export async function POST(request: Request) {
       )
     }
 
-    // Fetch conversation and contact
-    const { data: conversation, error: convError } = await supabase
-      .from('conversations')
-      .select('*, contact:contacts(*)')
-      .eq('id', conversation_id)
-      .eq('user_id', user.id)
-      .single()
+    if (isMediaKind && !media_url) {
+      return NextResponse.json(
+        { error: `media_url is required for ${message_type} messages` },
+        { status: 400 }
+      )
+    }
 
-    if (convError || !conversation) {
+    // Meta caps media captions at 1024 chars; reject before the upload is
+    // wasted at the Meta call. (Audio carries no caption — see meta-api.)
+    if (
+      isMediaKind &&
+      message_type !== 'audio' &&
+      typeof content_text === 'string' &&
+      content_text.length > 1024
+    ) {
+      return NextResponse.json(
+        { error: 'Caption exceeds the 1024-character limit' },
+        { status: 400 }
+      )
+    }
+
+    // Resolve the target conversation. With `conversation_id` we load the
+    // existing thread; with `contact_id` we find-or-create one for the
+    // contact so a business-initiated template send (Contact detail view)
+    // reuses this whole path — phone variants, send-builder, persistence.
+    let conversation: { id: string; contact?: { id: string; phone?: string } | null } | null = null
+
+    if (conversationIdInput) {
+      const { data, error: convError } = await supabase
+        .from('conversations')
+        .select('*, contact:contacts(*)')
+        .eq('id', conversationIdInput)
+        .eq('account_id', accountId)
+        .single()
+
+      if (convError || !data) {
+        return NextResponse.json(
+          { error: 'Conversation not found' },
+          { status: 404 }
+        )
+      }
+      conversation = data
+    } else {
+      // contact_id path: verify the contact is in this account first so a
+      // caller can't open a conversation against someone else's contact.
+      const { data: contactRow, error: contactErr } = await supabase
+        .from('contacts')
+        .select('*')
+        .eq('id', contact_id)
+        .eq('account_id', accountId)
+        .maybeSingle()
+
+      if (contactErr || !contactRow) {
+        return NextResponse.json(
+          { error: 'Contact not found' },
+          { status: 404 }
+        )
+      }
+
+      const resolved = await findOrCreateConversation(
+        supabase,
+        accountId,
+        user.id,
+        contact_id
+      )
+      if (!resolved) {
+        return NextResponse.json(
+          { error: 'Failed to open a conversation for this contact' },
+          { status: 500 }
+        )
+      }
+      // The embed may not round-trip on insert; pin the contact we verified.
+      conversation = { ...resolved, contact: resolved.contact ?? contactRow }
+    }
+
+    if (!conversation) {
       return NextResponse.json(
         { error: 'Conversation not found' },
         { status: 404 }
       )
     }
+
+    const conversation_id = conversation.id
 
     const contact = conversation.contact
     if (!contact?.phone) {
@@ -106,7 +224,7 @@ export async function POST(request: Request) {
     const { data: config, error: configError } = await supabase
       .from('whatsapp_config')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('account_id', accountId)
       .single()
 
     if (configError || !config) {
@@ -177,6 +295,37 @@ export async function POST(request: Request) {
     let waMessageId = ''
     let workingPhone = sanitizedPhone
 
+    // For template sends, load the row so sendTemplateMessage can
+    // build header + button components from the template definition.
+    // Match on (user_id, name, language) — same triple the unique
+    // index enforces — so multi-language templates work correctly.
+    // Missing template falls through with `templateRow = null` and
+    // the legacy body-only path runs.
+    // Load the template row so sendTemplateMessage can build header
+    // + button components from the definition. isMessageTemplate
+    // guards against a malformed row (e.g. from a partial sync)
+    // crashing the send-builder later in the stack.
+    let templateRow: MessageTemplate | null = null
+    if (message_type === 'template' && template_name) {
+      const { data } = await supabase
+        .from('message_templates')
+        .select('*')
+        .eq('account_id', accountId)
+        .eq('name', template_name)
+        .eq('language', template_language || 'en_US')
+        .maybeSingle()
+      if (data && !isMessageTemplate(data)) {
+        return NextResponse.json(
+          {
+            error:
+              'Template row is malformed locally — run "Sync from Meta" in Settings to repair it.',
+          },
+          { status: 500 },
+        )
+      }
+      templateRow = data ?? null
+    }
+
     const attempt = async (phone: string): Promise<string> => {
       if (message_type === 'template') {
         const result = await sendTemplateMessage({
@@ -184,7 +333,28 @@ export async function POST(request: Request) {
           accessToken,
           to: phone,
           templateName: template_name,
+          language: template_language || 'en_US',
+          template: templateRow ?? undefined,
+          messageParams: template_message_params ?? undefined,
+          // Legacy body-only fallback — only consulted when
+          // messageParams.body isn't set.
           params: template_params || [],
+          contextMessageId,
+        })
+        return result.messageId
+      }
+      if (isMediaKind) {
+        // content_text doubles as the caption (ignored for audio inside
+        // sendMediaMessage). filename surfaces in the recipient's chat
+        // for documents only.
+        const result = await sendMediaMessage({
+          phoneNumberId: config.phone_number_id,
+          accessToken,
+          to: phone,
+          kind: message_type as MediaKind,
+          link: media_url,
+          caption: content_text || undefined,
+          filename: filename || undefined,
           contextMessageId,
         })
         return result.messageId
@@ -297,7 +467,7 @@ export async function POST(request: Request) {
           ended_at: new Date().toISOString(),
           end_reason: 'agent_replied',
         })
-        .eq('user_id', user.id)
+        .eq('account_id', accountId)
         .eq('contact_id', contact.id)
         .eq('status', 'active')
       if (pauseErr) {
@@ -326,4 +496,46 @@ export async function POST(request: Request) {
       { status: 500 }
     )
   }
+}
+
+type SendSupabase = Awaited<ReturnType<typeof createClient>>
+
+/**
+ * Return the contact's conversation in this account, creating one if it
+ * doesn't exist yet. Mirrors the webhook's find-or-create so an
+ * inbound-then-outbound (or outbound-first) sequence converges on a single
+ * thread per contact. Runs under the caller's RLS — the conversations_insert
+ * policy requires account agent membership, which the caller already is.
+ */
+async function findOrCreateConversation(
+  supabase: SendSupabase,
+  accountId: string,
+  userId: string,
+  contactId: string,
+) {
+  const { data: existing } = await supabase
+    .from('conversations')
+    .select('*, contact:contacts(*)')
+    .eq('account_id', accountId)
+    .eq('contact_id', contactId)
+    .maybeSingle()
+
+  if (existing) return existing
+
+  const { data: created, error } = await supabase
+    .from('conversations')
+    .insert({
+      account_id: accountId,
+      user_id: userId,
+      contact_id: contactId,
+    })
+    .select('*, contact:contacts(*)')
+    .single()
+
+  if (error) {
+    console.error('Error creating conversation for contact send:', error.message)
+    return null
+  }
+
+  return created
 }

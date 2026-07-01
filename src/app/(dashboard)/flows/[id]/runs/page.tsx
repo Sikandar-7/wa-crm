@@ -68,7 +68,7 @@ const STATUS_META: Record<
   },
   completed: {
     label: "Completed",
-    classes: "border-slate-700 bg-secondary border-border text-muted-foreground",
+    classes: "border-border bg-muted text-muted-foreground",
     icon: CircleCheck,
   },
   handed_off: {
@@ -78,12 +78,12 @@ const STATUS_META: Record<
   },
   timed_out: {
     label: "Timed out",
-    classes: "border-slate-700 bg-secondary border-border/60 text-muted-foreground",
+    classes: "border-border bg-muted/60 text-muted-foreground",
     icon: Clock,
   },
   paused_by_agent: {
     label: "Paused by agent",
-    classes: "border-slate-700 bg-secondary border-border text-muted-foreground",
+    classes: "border-border bg-muted text-muted-foreground",
     icon: PauseCircle,
   },
   failed: {
@@ -175,7 +175,7 @@ export default function FlowRunsPage() {
       <button
         type="button"
         onClick={() => router.push(`/flows/${flow.id}`)}
-        className="mb-2 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-muted-foreground"
+        className="mb-2 inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-3 w-3" />
         {flow.name}
@@ -187,7 +187,7 @@ export default function FlowRunsPage() {
       </p>
 
       {runs.length === 0 ? (
-        <div className="mt-6 rounded-lg border border-dashed border-slate-700 bg-card/50 px-6 py-12 text-center text-sm text-muted-foreground">
+        <div className="mt-6 rounded-lg border border-dashed border-border bg-card/50 px-6 py-12 text-center text-sm text-muted-foreground">
           No runs yet. Trigger the flow from a personal WhatsApp number to see
           it appear here.
         </div>
@@ -229,7 +229,7 @@ function RunCard({
       })
     : null;
   return (
-    <div className="rounded-lg border border-slate-800 bg-card">
+    <div className="rounded-lg border border-border bg-card">
       <button
         type="button"
         onClick={onToggle}
@@ -250,7 +250,7 @@ function RunCard({
               {meta.label}
             </Badge>
             {run.status === "active" && run.current_node_key && (
-              <code className="rounded bg-secondary border-border px-1.5 py-0.5 text-[10px] text-muted-foreground">
+              <code className="rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
                 at {run.current_node_key}
               </code>
             )}
@@ -265,7 +265,7 @@ function RunCard({
         </div>
       </button>
       {expanded && (
-        <div className="border-t border-slate-800 px-4 py-3">
+        <div className="border-t border-border px-4 py-3">
           {Object.keys(run.vars).length > 0 && (
             <details className="mb-3">
               <summary className="cursor-pointer text-xs text-muted-foreground">
@@ -314,7 +314,7 @@ function EventLine({ ev }: { ev: EventRow }) {
         {ev.event_type}
       </span>
       {ev.node_key && (
-        <code className="shrink-0 rounded bg-secondary border-border px-1 py-0.5 text-[10px] text-muted-foreground">
+        <code className="shrink-0 rounded bg-muted px-1 py-0.5 text-[10px] text-muted-foreground">
           {ev.node_key}
         </code>
       )}

@@ -28,9 +28,13 @@ export function Step1ChooseTemplate({ selectedTemplate, onSelect, onNext, onBack
     async function fetchTemplates() {
       try {
         const supabase = createClient();
+        // Only APPROVED templates can be sent via Meta — anything else
+        // would 400 at broadcast time. Hide them rather than letting
+        // the user pick a template that will fail.
         const { data, error: fetchError } = await supabase
           .from('message_templates')
           .select('*')
+          .eq('status', 'APPROVED')
           .order('created_at', { ascending: false });
 
         if (fetchError) throw fetchError;
@@ -71,8 +75,8 @@ export function Step1ChooseTemplate({ selectedTemplate, onSelect, onNext, onBack
       </div>
 
       {templates.length === 0 ? (
-        <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-slate-800 bg-card/50">
-          <FileText className="mb-2 h-8 w-8 text-slate-600" />
+        <div className="flex h-48 flex-col items-center justify-center rounded-xl border border-border bg-card/50">
+          <FileText className="mb-2 h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">No templates available.</p>
           <p className="mt-1 text-xs text-muted-foreground">Create a template in Settings first.</p>
         </div>
@@ -89,7 +93,7 @@ export function Step1ChooseTemplate({ selectedTemplate, onSelect, onNext, onBack
                 className={`flex flex-col gap-3 rounded-xl border p-4 text-left transition-all ${
                   isSelected
                     ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
-                    : 'border-slate-800 bg-card/50 hover:border-slate-700 hover:bg-card'
+                    : 'border-border bg-card/50 hover:border-border hover:bg-card'
                 }`}
               >
                 <div className="flex items-start justify-between">
@@ -103,12 +107,9 @@ export function Step1ChooseTemplate({ selectedTemplate, onSelect, onNext, onBack
                 <p className="line-clamp-3 text-xs text-muted-foreground">{template.body_text}</p>
                 <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                   <span>{template.language ?? 'en_US'}</span>
-                  {template.status && (
-                    <>
-                      <span>-</span>
-                      <span>{template.status}</span>
-                    </>
-                  )}
+                  {/* Status is omitted on purpose — every template
+                      shown here is already filtered to APPROVED,
+                      so the chip carried no information. */}
                 </div>
               </button>
             );
@@ -116,8 +117,8 @@ export function Step1ChooseTemplate({ selectedTemplate, onSelect, onNext, onBack
         </div>
       )}
 
-      <div className="flex items-center justify-between border-t border-slate-800 pt-4">
-        <Button variant="outline" onClick={onBack} className="border-slate-700 text-muted-foreground">
+      <div className="flex items-center justify-between border-t border-border pt-4">
+        <Button variant="outline" onClick={onBack} className="border-border text-muted-foreground">
           Back
         </Button>
         <Button

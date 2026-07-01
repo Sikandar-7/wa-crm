@@ -6,6 +6,7 @@ import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { PresenceHeartbeat } from "@/components/presence/presence-heartbeat";
 
 // Auth-gated dashboard shell. Extracted from the layout so the layout
 // itself can stay a server component and export metadata (noindex) —
@@ -41,7 +42,8 @@ function DashboardShellInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      <Suspense fallback={<div className="w-64 bg-card border-r border-slate-800" />}>
+      <PresenceHeartbeat />
+      <Suspense fallback={<div className="w-64 bg-card border-r border-border" />}>
         <Sidebar open={sidebarOpen} onClose={closeSidebar} />
       </Suspense>
       <div className="flex flex-1 flex-col overflow-hidden">
